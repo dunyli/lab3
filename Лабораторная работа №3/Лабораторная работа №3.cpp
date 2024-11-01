@@ -255,6 +255,205 @@ void outmenu() {
     printf("Выберите действие: ");
 }
 
+int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    setlocale(0, "Rus");
+    Store store;
+    Storehouse storehouse;
+    OrderHistory orderhistory;
+    Order new_order;
+    int choice;
+    char name[50], address[100], phone[20];
+    int price, num_products = 0, count, category_id, supplier_id;
+    int client_id, product_id, volume;
+    int num_products_order = 0, total_price = 0;
+    int count_product_volume;
+    do {
+        outmenu();
+        scanf("%d", &choice);
+        getchar();  // Удаляем символ новой строки из буфера
+        switch (choice) {
+        case 1: {
+            printf("Введите имя клиента: ");
+            fgets(name, 50, stdin);
+            printf("Введите телефон клиента: ");
+            fgets(phone, 20, stdin);
+            printf("Введите адрес клиента: ");
+            fgets(address, 100, stdin);
+            // Удаляем символ новой строки
+            name[strcspn(name, "\n")] = 0;
+            phone[strcspn(phone, "\n")] = 0;
+            address[strcspn(address, "\n")] = 0;
+            Client new_client(name, phone, address);
+            store.addClient(&new_client);
+            break;
+        }
+        case 2: {
+            printf("Введите название категории:  ");
+            fgets(name, 50, stdin);
+            // Удаляем символ новой строки
+            name[strcspn(name, "\n")] = 0;
+            Category new_category(name);
+            store.addCategory(&new_category);
+            break;
+        }
+        case 3: {
+            printf("Введите название поставщика: ");
+            fgets(name, 50, stdin);
+            printf("Введите адрес поставщика:  ");
+            fgets(address, 100, stdin);
+            printf("Введите телефон поставщика: ");
+            fgets(phone, 20, stdin);
+            // Удаляем символ новой строки
+            name[strcspn(name, "\n")] = 0;
+            address[strcspn(address, "\n")] = 0;
+            phone[strcspn(phone, "\n")] = 0;
+            Supplier new_supplier(name, phone, address);
+            store.addSupplier(&new_supplier);
+            break;
+        }
+        case 4: {
+            do {
+                printf("Введите ID категории (или 0 для выхода): ");
+                scanf("%d", &category_id);
+                if (category_id < 0 || category_id > store.listnum_categories()) printf("Неверный ID категории! ");
+            } while (category_id < 0 || category_id > store.listnum_categories());
+            if (category_id != 0) {
+                do {
+                    printf("Введите ID поставщика (или 0 для выхода): ");
+                    scanf("%d", &supplier_id);
+                    if (supplier_id < 0 || supplier_id > store.listnum_suppliers()) printf("Неверный ID поставщика! ");
+                } while (supplier_id < 0 || supplier_id > store.listnum_suppliers());
+                if (supplier_id != 0) {
+                    while (getchar() != '\n');
+                    printf("Введите название товара:");
+                    fgets(name, 50, stdin);
+                    printf("Введите цену товара: ");
+                    scanf("%d", &price);
+                    printf("Введите количество товара: ");
+                    scanf("%d", &count);
+                    // Удаляем символ новой строки
+                    name[strcspn(name, "\n")] = 0;
+                    Product new_product;
+                    new_product.set(name, price, count, category_id, supplier_id);
+                    storehouse.addProduct(&new_product);
+                    printf("Товар добавлен! ");
+                }
+            }
+            break;
+        }
+        case 5: {
+            num_products_order = 0;
+            total_price = 0;
+            do {
+                printf("Введите ID клиента (или 0 для завершения): ");
+                scanf("%d", &client_id);
+                if (client_id < 0 || client_id > store.listnum_categories()) printf("Неверный ID клиента! ");
+            } while (client_id < 0 || client_id > store.listnum_clients());
+            if (client_id != 0) {
+                printf("Введите ID товара (или 0 для завершения): ");
+                scanf("%d", &product_id);
+                while (product_id != 0) {
+                    if (product_id > 0 && product_id <= storehouse.listnum_products()) {
+                        Product new_product;
+                        storehouse.listStorehouse(&new_product, product_id - 1);
+                        printf("%d", new_product.getCount());
+                        printf("Введите количество товара: ");
+                        scanf("%d", &volume);
+                        if (volume > 0 && volume <= new_product.getCount()) {
+                            total_price += new_product.getPrice() * volume;
+                            new_product.get(name, &price, &count, &category_id, &supplier_id);
+                            count_product_volume = count - volume;
+                            storehouse.editProduct(product_id - 1, name, price, count_product_volume, category_id, supplier_id);
+                            new_product.set(name, price, volume, category_id, supplier_id);
+                            new_order.addProduct(&new_product);
+                            num_products_order++;
+                        }
+                        else printf("Неверное количество товара!\n");
+                    }
+                    else printf("Неверный ID товара!\n");
+                    printf("Введите ID нового товара (или 0 для завершения): ");
+                    scanf("%d", &product_id);
+                }
+            }
+            if (num_products_order > 0) {
+                new_order.set(client_id, num_products_order, total_price);
+                orderhistory.addOrder(&new_order);
+                printf("Заказ создан!\n");
+            }
+            break;
+        }
+        case 6:
+            printf("Список клиентов:\n");
+            for (int j = 0; j < store.listnum_clients(); j++) {
+                printf("ID клиента: %d\n", j + 1);
+                Client new_client(name, phone, address);
+                store.listClients(&new_client, j);
+                new_client.get(name, phone, address);
+                printf("Имя клиента: %s, Телефон: %s, Адрес: %s\n", name, phone, address);
+            }
+            break;
+        case 7:
+            printf("Список категорий:\n");
+            for (int j = 0; j < store.listnum_categories(); j++) {
+                printf("ID категории: %d  ", j + 1);
+                Category new_category(name);
+                store.listCategories(&new_category, j);
+                new_category.get(name);
+                printf("Название категории: %s\n", name);
+            }
+            break;
+        case 8:
+            printf("Список поставщиков:\n");
+            for (int j = 0; j < store.listnum_suppliers(); j++) {
+                printf("ID поставщика: %d  ", j + 1);
+                Supplier new_supplier(name, phone, address);
+                store.listSuppliers(&new_supplier, j);
+                new_supplier.get(name, phone, address);
+                printf("Название поставщика: %s, Телефон: %s, Адрес: %s\n", name, phone, address);
+            }
+            break;
+        case 9:
+            printf("Список товаров:\n");
+            for (int j = 0; j < storehouse.listnum_products(); j++) {
+                printf("ID: %d. ", j + 1);
+                Product new_product;
+                new_product.set(name, price, count, category_id, supplier_id);
+                storehouse.listStorehouse(&new_product, j);
+                new_product.get(name, &price, &count, &category_id, &supplier_id);
+                printf("Название продукта: %s, Цена: %d, Количество: %d\n", name, price, count);
+            }
+            break;
+        case 10:
+            printf("История заказов:\n");
+            for (int j = 0; j < orderhistory.listorder_count(); j++) {
+                printf("Заказ №%d. ", j + 1);
+                orderhistory.listOrders(&new_order, j);
+                new_order.get(&client_id, &num_products, &total_price);
+                printf("ID клиента: %d  ", client_id);
+                for (int a = 0; a < num_products; a++) {
+                    printf("Товары: ");
+                    printf("%d. ", a + 1);
+                    Product new_product;
+                    new_order.listProducts(&new_product, a);
+                    new_product.get(name, &price, &count, &category_id, &supplier_id);
+                    printf("Название продукта: %s, Цена: %d, Количество: %d\n", name, price, count);
+                }
+                printf("Общая стоимость: %d\n", total_price);
+                printf("\n");
+            }
+            break;
+        case 0:
+            printf("Выход...\n");
+            break;
+        default:
+            printf("Неверный ввод. Пожалуйста, попробуйте еще раз.\n");
+        }
+    } while (choice != 0);
+    return 0;
+}
+
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
 // Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
 
