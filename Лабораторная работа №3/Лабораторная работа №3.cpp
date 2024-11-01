@@ -238,6 +238,23 @@ void Storehouse::editProduct(int product_id, char* name, int price, int volume, 
     products[product_id].set(name, price, volume, category_id, supplier_id);
 }
 
+// Функция для вывода меню
+void outmenu() {
+    printf("\nЗоомагазин Собачий Патруль\n");
+    printf("1. Добавить клиента\n");
+    printf("2. Добавить категорию\n");
+    printf("3. Добавить поставщика\n");
+    printf("4. Добавить товар\n");
+    printf("5. Создать заказ\n");
+    printf("6. Вывести список клиентов\n");
+    printf("7. Вывести список категорий\n");
+    printf("8. Вывести список поставщиков\n");
+    printf("9. Вывести список товаров\n");
+    printf("10. Вывести список заказов\n");
+    printf("0. Выход\n");
+    printf("Выберите действие: ");
+}
+
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
 // Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
 
