@@ -82,7 +82,7 @@ public:
     void listProducts(Product* product, int count); // Получение даных о продукте
 };
 
-// Структура для хранения информации о количестве товара
+// Класс для хранения информации о количестве товара
 class Storehouse {
 private:
     Product* products;

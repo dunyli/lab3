@@ -123,7 +123,7 @@ void Product::set(char* name, int price, int count, int category_id, int supplie
     this->supplier_id = supplier_id;
 }
 
-//Получение значений переменных-членов класса и данных класса Product
+//Получение значений переменных-членов класса и данных класса Order
 void Order::get(int* client_id, int* num_products, int* total_price) {
     *client_id = this->client_id;
     *num_products = this->num_products;
@@ -285,8 +285,7 @@ int main() {
             name[strcspn(name, "\n")] = 0;
             phone[strcspn(phone, "\n")] = 0;
             address[strcspn(address, "\n")] = 0;
-            Client new_client(name, phone, address);
-            store.addClient(&new_client);
+            store.addClient(new Client(name, phone, address));
             break;
         }
         case 2: {
